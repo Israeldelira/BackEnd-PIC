@@ -2,7 +2,11 @@
 //Modules and files 
 const router = require('express').Router();
 const {check} = require('express-validator');
-const {login}=require('../controllers/auth');
+const {login,renewToken}=require('../controllers/auth');
+const {validationJWT} = require('../middlewares/validateJWT');
+
+
+
 const { fieldValidation}=require('../middlewares/fields-validation');
 
 //Login path with middleware for field validation if empty
@@ -14,5 +18,7 @@ router.post('/',
 ],
 login
 );
+
+router.get('/renew',validationJWT,renewToken);
 
 module.exports=router;

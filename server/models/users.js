@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema(
             required: [true, 'El password es requerido'],
          
         },
+        status: {
+            type: Boolean,
+            default: true,
+        },
     },
         {
             collection: "User",

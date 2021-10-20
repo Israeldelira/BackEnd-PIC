@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "start ./server/server",
-    "dev": "nodemon ./server/server"
+    "dev": "nodemon ./server/server",
+    "start": "nodemon ./server/server"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-fileupload": "^1.2.1",
     "express-validator": "^6.12.2",
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
@@ -30,6 +32,8 @@
     "mongoose": "^5.11.15",
     "mongoose-unique-validator": "^2.0.3",
     "nodemon": "^2.0.7",
-    "passport": "^0.4.1"
+    "passport": "^0.4.1",
+    "qrcode": "^1.4.4",
+    "uuid": "^8.3.2"
   }
 }

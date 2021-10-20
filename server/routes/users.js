@@ -3,7 +3,6 @@
 const {check} = require('express-validator');
 const {validationJWT} = require('../middlewares/validateJWT');
 const router = require('express').Router();
-const validation = require("../middlewares/validation");
 const {createUser,getUsers,editUser,deleteUser} = require("../controllers/users");
 const{fieldValidation} = require('../middlewares/fields-validation');
 

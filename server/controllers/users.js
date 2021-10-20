@@ -8,18 +8,20 @@ const { generateJWT } = require('../helpers/jwt');
 
 const getUsers = async (req, res) => {
     try {
+const pagination=Number(req.query.pagination)|| 0;
+console.log(pagination);
+    const [users,total]=await Promise.all([
+        User.find({},'nombre user role status')
+        .skip(pagination)
+        .limit(5),
 
-        //Search all users in db
-        const allUsers = await User.find({});
-        await
-            res.json({
-                status: 200,
-                ok: true,
-                allUsers,
-                user: req.user
-
-
-            })
+        User.count()
+    ])
+        res.status(200).json({
+            ok: true,
+            users,
+            total
+        }); 
     } catch (err) {
         res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
         console.log(err);

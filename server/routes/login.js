@@ -3,7 +3,7 @@ const express = require('express');
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const UserModel = require("../models/users");
-const validation= require("../middlewares/validation")
+
 
 router.post('/login-user', async (req, res) => {
     try { 

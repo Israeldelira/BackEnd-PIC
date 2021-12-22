@@ -1,9 +1,9 @@
 'use strict';
 //Modules and files
 const {check} = require('express-validator');
-const {validationJWT} = require('../middlewares/validateJWT');
+const {validationJWT,validationAdmin,validationSameUser} = require('../middlewares/validateJWT');
 const router = require('express').Router();
-const {createUser,getUsers,editUser,deleteUser} = require("../controllers/users");
+const {createUser,getUsers,editUser,deleteUser,getUsersAll} = require("../controllers/users");
 const{fieldValidation} = require('../middlewares/fields-validation');
 
 
@@ -20,10 +20,11 @@ router.post('/create-users', [
 });
 //GET users with middlewares
 router.get('/get-users',validationJWT,getUsers);
-
+router.get('/get-usersAll',validationJWT,getUsersAll);
 //PUT user with middlewares
 router.put('/edit-user/:id',
 [
+  validationSameUser,
   validationJWT,
   check('nombre','El nombre es obligatorio').not().isEmpty(),
   check('user','El user es obligatorio').not().isEmpty(),
@@ -36,6 +37,7 @@ editUser
 //DELETE USER with middlewares
 router.delete('/delete-user/:id',
 validationJWT,
+validationAdmin,
 deleteUser
 );
 

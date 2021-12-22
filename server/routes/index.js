@@ -11,5 +11,7 @@ app.use('/api/provider',require("./provider"));
 app.use('/api/search',require("./search"));
 app.use('/api/login',require("./auth"));
 app.use('/api/upload',require("./upload"));
+app.use('/api/warehouse',require("./warehouse"));
+app.use('/api/project',require("./project"));
 
 module.exports = app;

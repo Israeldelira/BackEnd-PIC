@@ -13,6 +13,13 @@ const ProviderSchema = new mongoose.Schema({
         trim: true,
 
     },
+    address: {
+        type: String,
+        required: [true, 'La direccion es requerida'],
+        maxlength: [200, "La direccion es muy larga"],
+        trim: true,
+
+    },
     phone: {
         type: Number,
         required: [true, 'El telefono de provedor es requerido'],

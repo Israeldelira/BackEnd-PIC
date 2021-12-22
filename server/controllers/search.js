@@ -3,28 +3,42 @@ const Article = require('../models/article');
 const Provider = require('../models/provider');
 const Category = require('../models/category');
 const Project = require('../models/project');
+const Output = require('../models/output');
 
 // search all
 
 const getAll = async (req, res) => {
     const data = req.params.searchData;
     const regex = new RegExp(data, 'i');
-    const [searchUser, searchArticle, searchProvider, searchCategory] = await Promise.all([
+    const [searchUser, searchArticle, searchProvider, searchCategory, searchProject] = await Promise.all([
+        User.find({
+            $or: [
+                { nombre: regex },
+                { user: regex }
+            ]},'img nombre user role status'),
+
         Article.find({
             $or: [
                 { name: regex },
                 { model: regex },
                 { trademark: regex },
             ]
-        }),
-        User.find({
-            $or: [
-                { nombre: regex },
-                { user: regex }
-            ]
-        },'nombre user role status'),
-        Provider.find({ name: regex }),
-        Category.find({ name: regex }),
+        }).populate('registerUser', 'nombre user')
+        .populate('category', 'name')
+        .populate('providerId', 'name'),
+       
+        Provider.find({ name: regex })
+        .populate('registerUser', 'nombre'),
+
+        Category.find({ name: regex })
+        .populate('registerUser','user'),
+
+        Project.find({  $or: [
+            { name: regex },
+            { client: regex },
+        ]})
+        .populate('registerUser','user')
+        .populate('article','name')
     ]);
 
     res.json({
@@ -33,7 +47,8 @@ const getAll = async (req, res) => {
         searchUser,
         searchArticle,
         searchProvider,
-        searchCategory
+        searchCategory,
+        searchProject
     })
 
 }
@@ -45,38 +60,58 @@ const getCollectionAll = async (req, res = response) => {
     let result = [];
 
     switch (table) {
-        case 'user':
+        case 'users':
 
             result = await User.find({
                 $or: [
                     { nombre: regex },
                     { user: regex }
                 ]
-            },'nombre user role status');
+            },'img nombre user role status');
+            
             break;
-        case 'article':
+        case 'articles':
             result = await Article.find({
                 $or: [
                     { name: regex },
                     { model: regex },
                     { trademark: regex },
                 ]
-            }).populate('registerUser', 'nombre', 'user')
+            }).populate('registerUser', 'nombre user')
                 .populate('category', 'name')
                 .populate('providerId', 'name');
 
             break;
 
-        case 'provider':
+        case 'providers':
 
             result = await Provider.find({ name: regex })
-                .populate('registerUser', 'nombre');;
+                .populate('registerUser', 'nombre');
             break;
 
-        case 'category':
+        case 'categorys':
 
-            result = await Category.find({ name: regex });
+            result = await Category.find({ name: regex })
+            .populate('registerUser','user');
             break;
+
+            case 'projects':
+
+                result = await Project.find({  $or: [
+                    { name: regex },
+                    { client: regex },
+                ] })
+                .populate('registerUser','user')
+                .populate('article','name')
+                break;
+
+        case 'bajas':
+
+                result = await Output.find({})
+                .populate('registerUser','user')
+                .populate('project','name')
+                .populate({ path: 'article', match: { name: { $regex: regex } } })
+                break;
 
         default: 
         return res.status(400).json({

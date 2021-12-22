@@ -18,6 +18,21 @@ const fieldValidation = (req, res = response, next) => {
     next();
 }
 
+function isImage(value, filename) {
+    
+            var extension = (path.extname(filename)).toLowerCase();
+            switch (extension) {
+                case '.jpg':
+                    return '.jpg';
+                case '.jpeg':
+                    return '.jpeg';
+                case  '.png':
+                    return '.png';
+                default:
+                    return false;
+            }
+        }
+
 // const validateUser = async user => {
 //     let user = await User.findOne({ user });
 //     return user ? false : true;
@@ -26,5 +41,5 @@ const fieldValidation = (req, res = response, next) => {
 //Exporting functions for the use in other files
 module.exports = {
     fieldValidation,
-    // validateUser
+    isImage
 }

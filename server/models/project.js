@@ -18,9 +18,31 @@ const ProjectSchema = new mongoose.Schema({
         trim: true,
         maxlength: [40, "El cliente es muy largo"],
     },
+    registerUser: {
+        type: String,
+        required: [true, 'El nombre de quien registro es requerido'],
+        trim: true,
+      
+    },
+    // registerUser: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "User"
+    // },
     outputs: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Output"
+    },
+    manager: {
+        type: String,
+        required: [true, 'El encargado del proyecto es requerido'],
+    },
+    status: {
+        type: Boolean,
+        default: true,
+    },
+    complete: {
+        type: Boolean,
+        default: false,
     },
 }, {
     collection: "Project",

@@ -18,6 +18,10 @@ const CategorySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    registerUser: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }
 
 });
 CategorySchema.plugin(uniquevalidator, {

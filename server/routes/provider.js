@@ -3,7 +3,7 @@
 const {check} = require('express-validator');
 const {validationJWT} = require('../middlewares/validateJWT');
 const router = require('express').Router();
-const {createProvider,getProviders,editProvider,deleteProvider} = require("../controllers/provider");
+const {createProvider,getProviders,editProvider,deleteProvider,getProvider,getProvidersAll} = require("../controllers/provider");
 const{fieldValidation} = require('../middlewares/fields-validation');
 
 //POST user with middlewares
@@ -18,8 +18,15 @@ router.post('/create-provider',
 , createProvider ,async (req, res) => {
    
 });
-//GET users with middlewares
+//GET provider with middlewares
 router.get('/get-providers',validationJWT,getProviders);
+router.get('/get-providersAll',validationJWT,getProvidersAll);
+
+//GET just a one provider
+router.get('/get-provider/:id',
+validationJWT,
+getProvider
+);
 
 //PUT user with middlewares
 router.put('/edit-provider/:id',

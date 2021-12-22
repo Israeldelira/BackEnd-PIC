@@ -7,11 +7,11 @@ const uniquevalidator = require('mongoose-unique-validator');
 const InputSchema = new mongoose.Schema({
 
     article: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Article"
     },
     registerUser: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
 

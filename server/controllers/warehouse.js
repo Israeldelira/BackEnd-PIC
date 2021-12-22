@@ -1,0 +1,345 @@
+//Modules and files
+const Article = require('../models/article');
+const Input = require('../models/input');
+const Output =require('../models/output');
+
+
+const getOutputs = async (req, res) => {
+    try {
+        const pagination=Number(req.query.pagination)|| 0;
+        const [outputs, total]=await Promise.all([
+            Output.find()
+            .skip(pagination)
+            .limit(5)
+            .populate('registerUser', 'user')
+            .populate('project', 'name')
+            .populate('article', 'name'),
+         
+            Output.countDocuments()
+    ])
+       
+            res.json({
+                status: 200,
+                ok: true,
+                total,
+            outputs,
+            })
+    } catch (err) {
+        res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
+        console.log(err);
+    }
+}
+
+
+const addOutput = async (req, res) => {
+    const _id = req._id;
+    const newOutput = new Output({
+        registerUser: _id,
+        ...req.body
+    });
+    const quantity = newOutput.quantity
+    const idArticle=newOutput.article
+    try {
+
+        if (quantity <=0) {
+            return res.status(400).json({
+                ok: false,
+                msg: `No se puede agregar una salida igual o menor a 0`
+            });
+        }
+        const findArticleDB = await Article.findById(idArticle);
+        const quantityOld= findArticleDB.quantity
+        const newQuantity=quantityOld-quantity
+        if(!findArticleDB){
+            return res.status(400).json({
+                ok: false,
+                msg: `No se existe ese id en los articulos`
+            });
+        }
+        if (quantityOld <quantity) {
+            return res.status(400).json({
+                ok: false,
+                msg: `No se puede descontar mas del stock`
+            });
+        }
+
+
+console.log("cantidad vieja"+quantityOld)
+console.log("cantidad nueva"+quantity)
+console.log("reusltado"+newQuantity)
+
+console.log("Actualizacion del articulo -----------")
+
+const updateArticle = await Article.findOneAndUpdate({ _id: idArticle},{$set:{quantity:newQuantity}}, { useFindAndModify: false, new: true })
+console.log("si realizo la peticion")
+if(!updateArticle){
+    return res.status(400).json({
+        ok: false,
+        msg: `No se pudo actualizar la cantidad actual`
+    });
+}
+//  const actualizacion = await Article.findOneAndUpdate({ _id: idArticle}, (err, articulosDB) => {
+//     articulosDB.quantity = newQuantity
+//     console.log("cantidad nueva"+articulosDB.quantity)
+//     articulosDB.save((err) => {
+//         console.log(err);
+//         res.status(500).json({
+//             ok: false,
+//             error: 'No se ha podido agregar la salida'
+//         });
+//     })
+// });
+console.log("si actualizo todo")
+        await newOutput.save();
+
+        res.status(200).json({
+            ok: true,
+            newOutput,
+            msg: `Se registro la salida con exito`
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            ok: false,
+            error: 'No se ha podido agregar la salida'
+        });
+    }
+}
+
+const getInputs = async (req, res) => {
+    try {
+        const pagination=Number(req.query.pagination)|| 0;
+        const [inputs, total]=await Promise.all([
+            Input.find()
+            .skip(pagination)
+            .limit(5)
+            .populate('registerUser', 'user')
+            .populate('article', 'name'),
+         
+            Input.countDocuments()
+    ])
+            res.json({
+                status: 200,
+                ok: true,
+                total,
+            inputs,
+            })
+    } catch (err) {
+        res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
+        console.log(err);
+    }
+}
+const addInput = async(req,res) =>{
+    const _id = req._id;
+    const newInput = new Input({
+        registerUser: _id,
+        ...req.body
+    });
+    const quantity = newInput.quantity
+    const idArticle=newInput.article
+    try {
+        if (quantity <=0) {
+            return res.status(400).json({
+                ok: false,
+                msg: `No se puede agregar una entrada igual o menor a 0`
+            });
+        }
+        const findArticleDB = await Article.findById(idArticle);
+        const quantityOld= findArticleDB.quantity
+        const newQuantity=quantityOld+quantity
+        if(!findArticleDB){
+            return res.status(400).json({
+                ok: false,
+                msg: `No se existe ese id en los articulos`
+            });
+        }
+  
+
+
+console.log("cantidad vieja"+quantityOld)
+console.log("cantidad nueva"+quantity)
+console.log("reusltado"+newQuantity)
+
+console.log("Actualizacion del articulo -----------")
+
+const updateArticle = await Article.findOneAndUpdate({ _id: idArticle},{$set:{quantity:newQuantity}}, { useFindAndModify: false, new: true })
+console.log("si realizo la peticion")
+if(!updateArticle){
+    return res.status(400).json({
+        ok: false,
+        msg: `No se pudo actualizar la cantidad actual`
+    });
+}
+//  const actualizacion = await Article.findOneAndUpdate({ _id: idArticle}, (err, articulosDB) => {
+//     articulosDB.quantity = newQuantity
+//     console.log("cantidad nueva"+articulosDB.quantity)
+//     articulosDB.save((err) => {
+//         console.log(err);
+//         res.status(500).json({
+//             ok: false,
+//             error: 'No se ha podido agregar la salida'
+//         });
+//     })
+// });
+console.log("si actualizo todo")
+        await newInput.save();
+
+        res.status(200).json({
+            ok: true,
+            newInput,
+            msg: `Se registro la entrada con exito`
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            ok: false,
+            error: 'No se ha podido agregar la entrada'
+        });
+    }
+}
+
+const getGrafic= async(req,res)=>{
+try{
+
+    const [totalIn,totalOut,date] = await Promise.all([
+       Input.aggregate([{
+        // created_at: {
+        //     $gte: ISODate("2010-04-29T00:00:00.000Z"),
+        //     $lt: ISODate("2010-05-01T00:00:00.000Z")
+        //     }
+            $group: {
+                _id: '',
+                quantity: { $sum: '$quantity' }}
+            }]),
+       Output.aggregate([{
+                $group: {
+                    _id: '',
+                    quantity: { $sum: '$quantity' }}
+                }])
+
+        ])
+       res.json({
+         status: 200,
+         ok: true,
+         totalIn,
+         totalOut  
+    })
+}catch(err){
+        console.log(err);
+        res.status(500).json({
+            ok: false,
+            error: 'Ocurrio un problema con el servidor'
+        });
+}
+}
+
+
+
+
+
+
+
+
+
+
+// //<-------------------PUT edit user  --------------------------------->
+// const editArticle = async (req, res) => {
+
+//     const _idArticle = req.params.id;
+//     console.log("este es el id  ANTES DEL TRY"+req._id)
+
+//     try {
+
+//         const findArticleDB = await Article.findById(_idArticle);
+//         if (!findArticleDB) {
+//             return res.status(404).json({
+//                 ok: false,
+//                 msg: 'No existe el articulo con ese id'
+//             });
+//         }
+//         //Includes all values ​​except those before 3 points
+//         const {
+//             model,
+//             codeQR,
+//             ...dataArticle } = req.body;
+
+
+//         //validation of if exist user before modify
+//         if (findArticleDB.model !== req.body.model) {
+
+//             const validationArticle = await Article.findOne({ model });
+//             if (validationArticle) {
+//                 return res.status(400).json({
+//                     ok: false,
+//                     msg: 'El modelo de ese articulo ya esta registrado'
+//                 });
+//             }
+//         }
+
+//         dataArticle.model = model;
+       
+   
+//         let strQRUpdate = JSON.stringify(dataArticle)
+//         const updateQR = await QRCode.toDataURL(strQRUpdate)
+//         const imageQR = await QRCode.toString(strQRUpdate, { type: 'terminal' })
+//         console.log(imageQR)
+
+//         dataArticle.codeQR = updateQR;
+        
+//         const articleUpdate = await Article.findByIdAndUpdate(_idArticle, dataArticle, { new: true });
+
+//         res.json({
+//             ok: true,
+//             user: articleUpdate
+//         });
+
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({
+//             ok: false,
+//             msg: 'No se ha podido actualizar el articulo'
+//         })
+//     }
+// }
+
+// //<-------------DELETE delete user in the database----------------->
+// const deleteArticle = async (req, res) => {
+//     const _id = req.params.id;
+
+//     try {
+
+//         const findArticleDB = await Article.findById(_id);
+//         if (!findArticleDB) {
+//             return res.status(404).json({
+//                 ok: false,
+//                 msg: 'No existe el articulo con ese id'
+//             });
+//         }
+//         // await Article.findByIdAndUpdate(_id,{ status: false }, {new: true });
+//         await Article.findByIdAndDelete(_id);
+
+//         res.json({
+//             ok: true,
+//             msg: "Articulo eliminado con exito"
+//         })
+
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({
+//             ok: false,
+//             msg: 'El articulo no ha podido ser eliminado'
+//         })
+//     }
+// }
+//Exporting functions for the use in other files
+module.exports = {
+    getOutputs,
+    addOutput,
+    getInputs,
+    addInput,
+    getGrafic
+    // createArticle,
+    // editArticle,
+    // deleteArticle,
+    // getArticle
+}

@@ -2,6 +2,8 @@
 const User = require('../models/users');
 const bcryptjs = require('bcryptjs');
 const { generateJWT } = require('../helpers/jwt');
+const { getMenuFront } = require('../helpers/menuFrontend');
+
 
 //<---------------------Login function----------------------->
 const login = async (req, res) => {
@@ -33,7 +35,8 @@ const login = async (req, res) => {
             res.json({
                 status: 200,
                 ok: true,
-                token
+                token,
+                menu: getMenuFront(userDB.role)
 
             })
     } catch (err) {
@@ -45,9 +48,13 @@ const login = async (req, res) => {
 const renewToken = async (req,res)=>{
     const _id= req._id
     const token = await generateJWT(_id);
+    const user = await User.findById(_id);
     res.json({
         ok:true,
-        token
+        token,
+        user,
+        menu: getMenuFront(user.role)
+
     })
 }
 //Exporting functions for the use in other files

@@ -44,7 +44,7 @@ const ArticleSchema = new mongoose.Schema(
     levelStock: {
         type: String,
         default: "Alto",
-        enum:["Alto","Medio"],
+        enum:["Alto","Bajo"],
         required: true,
         trim: true,
        

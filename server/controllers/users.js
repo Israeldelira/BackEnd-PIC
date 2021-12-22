@@ -8,30 +8,44 @@ const { generateJWT } = require('../helpers/jwt');
 
 const getUsers = async (req, res) => {
     try {
-const pagination=Number(req.query.pagination)|| 0;
-console.log(pagination);
-    const [users,total]=await Promise.all([
-        User.find({},'nombre user role status')
-        .skip(pagination)
-        .limit(5),
+        const pagination = Number(req.query.pagination) || 0;
+        console.log(pagination);
+        const [usuarios, total] = await Promise.all([
+            User.find({}, '_id nombre user role status img')
+                .skip(pagination)
+                .limit(5),
 
-        User.count()
-    ])
+            User.countDocuments()
+        ])
         res.status(200).json({
             ok: true,
-            users,
+            usuarios,
             total
-        }); 
+        });
     } catch (err) {
         res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
         console.log(err);
+    }
+}
+const getUsersAll = async (req, res) => {
+    try {
+        const users = await User.find()
+        res.json({
+            status: 200,
+            ok: true,
+            users,
+        })
+    } catch (err) {
+        res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
+        console.log(err);
+
     }
 }
 
 //<-------------POST  create new user with password encryption ---------------->
 const createUser = async (req, res) => {
 
-    const { nombre, user, role, password, password2 } = req.body;
+    const { nombre, user, role, password, password2, img } = req.body;
 
     try {
 
@@ -40,7 +54,7 @@ const createUser = async (req, res) => {
         if (validationUser) {
             return res.status(400).json({
                 ok: false,
-                msg: 'El usuario registrado'
+                msg: 'El usuario ya esta registrado'
             });
         }
         //password encryption with bycryptjs
@@ -50,7 +64,8 @@ const createUser = async (req, res) => {
                 nombre,
                 user,
                 role,
-                password
+                password,
+                img
             });
         // const salt = bcryptjs.genSaltSync();
         // users.password = bcryptjs.hashSync(password, salt);
@@ -155,5 +170,6 @@ module.exports = {
     getUsers,
     createUser,
     editUser,
-    deleteUser
+    deleteUser,
+    getUsersAll
 }

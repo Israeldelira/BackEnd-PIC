@@ -1,26 +1,116 @@
 //Modules and files
 const Article = require('../models/article');
 const QRCode = require('qrcode')
-
+const path=require('path');
+const fs = require('fs');
+const fileUp = require('express-fileupload');
+const {uploadIMG} = require('../controllers/upload')
 //<-------------GET all articles  ---------------->
 
 const getArticles = async (req, res) => {
     try {
-
-        //Search all users in db
-        const allArticles = await Article.find()
+        const pagination=Number(req.query.pagination)|| 0;
+        const [allArticles, total]=await Promise.all([
+            Article.find()
+            .skip(pagination)
+            .limit(5)
             .populate('registerUser', 'nombre')
             .populate('category', 'name')
-            .populate('providerId', 'name')
-        // allArticles.date.toDateString();
-
-        await
+            .populate('providerId', 'name'),
+            Article.countDocuments()
+    ])  
+       
             res.json({
                 status: 200,
                 ok: true,
+                total,
                 allArticles,
             })
     } catch (err) {
+        res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
+        console.log(err);
+    }
+}
+const dashboardStock = async (req, res) => {
+    try {
+
+        const pagination=Number(req.query.pagination)|| 0;
+        const [lowStock,highStock, totalLow,totalHigh]= await Promise.all([
+            Article.find({ $and: [{ "levelStock": { '$regex': 'Alto' } }, { "quantity": { $lt: 10 } }] },)
+            .skip(pagination)
+            .limit(3)
+            .populate('registerUser', 'nombre')
+            .populate('category', 'name')
+            .populate('providerId', 'name'),
+
+            Article.find({ $and: [{ "levelStock": { '$regex': 'Bajo' } }, { "quantity": { $lt: 2 } }] },)
+            .populate('registerUser', 'nombre')
+            .populate('category', 'name')
+            .populate('providerId', 'name'),
+
+            Article.countDocuments(({ $and: [{ "levelStock": { '$regex': 'Alto' } }, { "quantity": { $lt: 10 } }] })),
+            Article.countDocuments(({ $and: [{ "levelStock": { '$regex': 'Bajo' } }, { "quantity": { $lt: 2 } }] }))
+    ])  
+       
+            res.json({
+                status: 200,
+                ok: true,
+                lowStock,
+                highStock,
+                totalLow,
+                totalHigh
+
+                ,
+            })
+    } catch (err) {
+        res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
+        console.log(err);
+    }
+}
+const getArticlesAll = async (req, res) => {
+    try {
+        const articles = await Article.find()
+        res.json({
+            status: 200,
+            ok: true,
+            articles,
+        })
+    } catch (err) {
+        res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
+        console.log(err);
+
+    }
+}
+
+const getArticle = async (req, res) => {
+    const _id = req.params.id;
+    try {
+        if (_id.match(/^[0-9a-fA-F]{24}$/)) {
+            const article = await Article.findById(_id)
+            .populate('registerUser', 'user')
+            .populate('category', 'name')
+            .populate('providerId', 'name');
+            
+        res.json({
+            status: 200,
+            ok: true,
+            article: article,
+        }) 
+        } else {
+            const articleModel = await Article.findOne({model:_id})
+            .populate('registerUser', 'user')
+            .populate('category', 'name')
+            .populate('providerId', 'name');
+            
+        res.json({
+            status: 200,
+            ok: true,
+            article: articleModel,
+        })   
+        }
+       
+    } catch (err) {
+        
         res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
         console.log(err);
     }
@@ -31,32 +121,60 @@ const createArticle = async (req, res) => {
 
     const { codeQR, registerUser, ...body } = req.body;
     const articleDB = await Article.findOne({ model: body.model });
-
     try {
+        let imagen = "sola";
         if (articleDB) {
             return res.status(400).json({
                 ok: false,
                 msg: `El modelo de ese  ${articleDB.model}, ya existe`
             });
         }
-
-        const dataNotQR = {
-            ...body,
-            registerUser: req._id,
+        if(req.files)
+        {
+           
+            const img = req.files.img
+            if(img !== ""){
+                imagen = await uploadIMG(img)
+            }
+        }else{
+            const imagen ="sola"
         }
+        
+        console.log("resultado"+imagen)
 
-        console.log("este es el id "+req._id)
-        let strQR = JSON.stringify(dataNotQR)
-        const resultadoQR = await QRCode.toDataURL(strQR)
-        const imageQR = await QRCode.toString(strQR, { type: 'terminal' })
+        //Generar el qr con datos del articulo
+
+        // const dataNotQR = {
+        //     ...body,
+        //     img:imagen,
+        //     registerUser: req._id,
+        // }
+        console.log("si manda el modelo"+body.model)
+        const urlArticulo=`http://192.168.3.22:4200/dashboard/salidas/${body.model}`
+
+        // const dataNotQR = {
+        //     urlArticulo
+        // //   model:body.model
+        // }
+        
+
+        console.log("este es el id  "+req._id)
+        // let strQR = JSON.stringify(dataNotQR)
+        const resultadoQR = await QRCode.toDataURL(urlArticulo)
+        const imageQR = await QRCode.toString(urlArticulo, { type: 'terminal' })
         console.log(imageQR)
         console.log(resultadoQR)
 
         const dataWithQR = {
-            ...dataNotQR,
-            codeQR: resultadoQR
+           
+            ...body,
+            img:imagen,
+            codeQR: resultadoQR,
+            registerUser: req._id,
         }
+       
         const newArticle = new Article(dataWithQR);
+        console.log("ME IMPORTA ESTA INFO"+newArticle)
 
         await newArticle.save();
 
@@ -166,5 +284,8 @@ module.exports = {
     getArticles,
     createArticle,
     editArticle,
-    deleteArticle
+    deleteArticle,
+    getArticle,
+    getArticlesAll,
+    dashboardStock
 }

@@ -7,19 +7,20 @@ const uniquevalidator = require('mongoose-unique-validator');
 const OutputSchema = new mongoose.Schema({
 
     article: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Article",
         required:true
     },
     registerUser: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User"
         
     },
     project: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Project",
         required:true
+        // type: String
     },
     description: {
         type: String,

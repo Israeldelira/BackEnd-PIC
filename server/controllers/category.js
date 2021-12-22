@@ -5,15 +5,22 @@ const Category = require('../models/category');
 
 const getCategorys = async (req, res) => {
     try {
-
-        //Search all users in db
-        const allCategorys = await Category.find()
-            .populate('user', 'name');
-        await
+        const pagination=Number(req.query.pagination)|| 0;
+        console.log(pagination);
+        const [allCategorys,total]=await Promise.all([
+            Category.find()
+            .skip(pagination)
+            .limit(5)
+            .populate('registerUser','user'),
+    
+            Category.countDocuments()
+        ])
+ 
             res.json({
                 status: 200,
                 ok: true,
-                allCategorys,
+               allCategorys,
+               total,
 
             })
     } catch (err) {
@@ -21,10 +28,25 @@ const getCategorys = async (req, res) => {
         console.log(err);
     }
 }
+const getCategorysAll = async (req, res) => {
+    try {
+        const categorys = await Category.find()
+        res.json({
+            status: 200,
+            ok: true,
+            categorys,
+        })
+    } catch (err) {
+        res.status(500).send({ error: 'Ha ocurrido un problema con el servidor' });
+        console.log(err);
+
+    }
+}
 
 //<-------------POST  create new user with password encryption ---------------->
 const createCategory = async (req, res) => {
-
+    const _id = req._id;
+  
     const { name } = req.body;
     try {
 
@@ -37,6 +59,7 @@ const createCategory = async (req, res) => {
         }
         const newCategory = new Category(
             {
+                registerUser:_id,
                 name
             });
         await newCategory.save();
@@ -139,5 +162,6 @@ module.exports = {
     getCategorys,
     createCategory,
     editCategory,
-    deleteCategory
+    deleteCategory,
+    getCategorysAll 
 }

@@ -5,7 +5,7 @@ const fs = require("fs");
 const cors = require('cors')
 const https = require("https");
 const express = require("express");
-const bodyParser = require('body-parser');
+
 
 const conexion = require("./config/db");
 const { PORT } = require("./config/config");
@@ -15,6 +15,7 @@ const { PORT } = require("./config/config");
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
 
 
 //Configuracion del CORS
@@ -39,14 +40,22 @@ if (process.env.DEVELOPMENT) {
    }
 
 //Server
-   const serverStart = async () => {
-    try {
-        // start the server
-        await https.createServer(credentials,app).listen(PORT);
-        console.log( `Server HTTPS running at https://localhost:${ PORT }` );
-    } catch ( err ) {
-        console.log( "Ocurrio un error"+err );
-        process.exit( 1 );
-    }
-};
-serverStart();
+//    const serverStart = async () => {
+//     try {
+//         // start the server
+//         await https.createServer(credentials,app).listen(PORT);
+//         console.log( `Server HTTPS running at https://localhost:${ PORT }` );
+//     } catch ( err ) {
+//         console.log( "Ocurrio un error"+err );
+//         process.exit( 1 );
+//     }
+// };
+
+
+// app.listen(PORT, function() {
+//     console.log(`Listening to port: ${PORT}`);
+// });
+
+app.listen(PORT, '0.0.0.0', function() {
+  console.log(`Listening to port: http://localhost: ${PORT}`);
+});

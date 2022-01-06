@@ -9,7 +9,7 @@ const getProjects = async (req, res) => {
             Project.find({ status: true })
                 .skip(pagination)
                 .limit(5)
-                .populate('registerUser', 'user')
+                .populate('registerUser', 'nombre')
                 .populate('outputs', 'article quantity description'),
 
             Project.countDocuments({ status: true })
@@ -72,7 +72,7 @@ const getProject = async (req, res) => {
     const _id = req.params.id;
     try {
         const project = await Project.findById(_id)
-            .populate('registerUser', 'user')
+            .populate('registerUser', 'name')
             .populate('outputs', 'article quantity description')
         res.json({
             status: 200,
@@ -87,11 +87,14 @@ const getProject = async (req, res) => {
 //<-------------POST  create new user with password encryption ---------------->
 const createProject = async (req, res) => {
     const _id = req._id;
+    console.log("id de usuario"+_id)
     const newProject = new Project({
         registerUser: _id,
         ...req.body
     });
+    console.log()
     const name = newProject.name;
+    console.log()
     try {
 
         // Validation of user with username

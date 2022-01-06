@@ -8,12 +8,12 @@ const getCategorys = async (req, res) => {
         const pagination=Number(req.query.pagination)|| 0;
         console.log(pagination);
         const [allCategorys,total]=await Promise.all([
-            Category.find()
+            Category.find({ "status": true })
             .skip(pagination)
             .limit(5)
             .populate('registerUser','user'),
     
-            Category.countDocuments()
+            Category.countDocuments({ "status": true })
         ])
  
             res.json({
@@ -30,7 +30,7 @@ const getCategorys = async (req, res) => {
 }
 const getCategorysAll = async (req, res) => {
     try {
-        const categorys = await Category.find()
+        const categorys = await Category.find({ "status": true })
         res.json({
             status: 200,
             ok: true,
@@ -50,7 +50,7 @@ const createCategory = async (req, res) => {
     const { name } = req.body;
     try {
 
-        const validationCategory = await Category.findOne({ name });
+        const validationCategory = await Category.findOne({ name ,"status": true });
         if (validationCategory) {
             return res.status(400).json({
                 ok: false,
@@ -100,7 +100,7 @@ const editCategory = async (req, res) => {
         //validation of if exist user before modify
         if (findCategoryDB.name !== req.body.name) {
 
-            const validationCategory = await Category.findOne({ name });
+            const validationCategory = await Category.findOne({ name, "status": true  });
             if (validationCategory) {
                 return res.status(400).json({
                     ok: false,
@@ -141,13 +141,21 @@ const deleteCategory = async (req, res) => {
             });
         }
         //Delete user by id in db
-
-        await Category.findByIdAndDelete(_id);
-
-        res.json({
-            ok: true,
-            msg: "Categoria  eliminada con exito"
+       await  Category.findByIdAndUpdate(_id, { status: false}, { new: true }, (err, userBD) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
         })
+
+        // await Category.findByIdAndDelete(_id);
+
+        // res.json({
+        //     ok: true,
+        //     msg: "Categoria  eliminada con exito"
+        // })
 
     } catch (error) {
         console.log(error);

@@ -56,7 +56,6 @@ const getMenuFront=(role)=>{
               titulo: 'Almacen',
               icono: 'mdi mdi-archive',
               submenu: [
-                { titulo: 'Informacion de almacen', url: '/dashboard/movimientos' },
                 { titulo: 'Entradas', url: '/dashboard/entradas/vacio' },
                 { titulo: 'Salidas', url: '/dashboard/salidas/vacio' },
              

@@ -95,7 +95,7 @@ const getCollectionAll = async (req, res = response) => {
             .populate('registerUser','user');
             break;
 
-            case 'projects':
+        case 'projects':
 
                 result = await Project.find({  $or: [
                     { name: regex },
@@ -106,12 +106,94 @@ const getCollectionAll = async (req, res = response) => {
                 break;
 
         case 'bajas':
+            const aggregate = [
+                {
+                  $lookup: {
+                    from: "Article",
+                    localField: "article",
+                    foreignField: "_id",
+                    as: "article"
+                  }
+                },
+                {
+                  $unwind: "$article"
+                },
+                {
+                  $match: {
+                    "article.name": { $regex: regex }
+                  }
+                },
+                {
+                    $lookup: {
+                        from: 'Project',
+                        localField: 'project',
+                        foreignField: '_id',
+                        as: 'project'
+                    }
+                },
+                {
+                    $unwind: "$project"
+                },
+                {
+                    $lookup: {
+                        from: 'User',
+                        localField: 'registerUser',
+                        foreignField: '_id',
+                        as: 'registerUser'
+                    }
+                },
+                {
+                    $unwind: "$registerUser"
+                }
+               
+              ];
+              
+              result = await Output.aggregate(aggregate).exec();
 
-                result = await Output.find({})
-                .populate('registerUser','user')
-                .populate('project','name')
-                .populate({ path: 'article', match: { name: { $regex: regex } } })
+                // result = await Output.find({})
+                // .populate('registerUser','user')
+                // .populate('project','name')
+                // .populate({ path: 'article', match: { name: { $regex: regex } } })
                 break;
+                case 'inputs':
+                    const aggregateInput = [
+                        {
+                          $lookup: {
+                            from: "Article",
+                            localField: "article",
+                            foreignField: "_id",
+                            as: "article"
+                          }
+                        },
+                        {
+                          $unwind: "$article"
+                        },
+                        {
+                          $match: {
+                            "article.name": { $regex: regex }
+                          }
+                        },
+                        {
+                            $lookup: {
+                                from: 'User',
+                                localField: 'registerUser',
+                                foreignField: '_id',
+                                as: 'registerUser'
+                            }
+                        },
+                        {
+                            $unwind: "$registerUser"
+                        }
+                       
+                      ];
+                      
+                      result = await Input.aggregate(aggregateInput).exec();
+        
+                        // result = await Output.find({})
+                        // .populate('registerUser','user')
+                        // .populate('project','name')
+                        // .populate({ path: 'article', match: { name: { $regex: regex } } })
+                        break;
 
         default: 
         return res.status(400).json({

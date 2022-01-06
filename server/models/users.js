@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            default: "ADMIN",
+            default: "USER",
             enum: ["USER", "ADMIN"],
             required: true,
             trim: true,
@@ -35,8 +35,12 @@ const UserSchema = new mongoose.Schema(
         },
         status: {
             type: Boolean,
-            default: false,
+            default: true,
         },
+        activate:{
+            type: Boolean,
+            default: false,
+        }
     },
     {
         collection: "User",

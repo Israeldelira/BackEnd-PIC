@@ -18,20 +18,42 @@ const ProjectSchema = new mongoose.Schema({
         trim: true,
         maxlength: [40, "El cliente es muy largo"],
     },
-    registerUser: {
-        type: String,
-        required: [true, 'El nombre de quien registro es requerido'],
-        trim: true,
-      
-    },
     // registerUser: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "User"
+    //     type: String,
+    //     required: [true, 'El nombre de quien registro es requerido'],
+    //     trim: true,
+      
     // },
-    outputs: {
+    registerUser: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Output"
+        ref: "User"
     },
+    // outputs: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Output"
+    // },
+    outputs:
+        [{
+            article: {
+                type: String,
+                required:true
+            },
+            description: {
+                type: String,
+                required: [true, 'La descripcion de la salida del articulo es requerida'],
+                trim: true,
+            },
+            quantity: {
+                type: Number,
+                min: [0, "No puede haber numeros negativos"]
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+        ]
+    ,
     manager: {
         type: String,
         required: [true, 'El encargado del proyecto es requerido'],

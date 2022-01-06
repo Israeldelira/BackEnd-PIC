@@ -9,12 +9,12 @@ const getProviders = async (req, res) => {
         console.log(pagination);
         //Search all users in db
         const [allProviders, total] = await Promise.all([
-            Provider.find()
+            Provider.find({ "status": true })
                 .skip(pagination)
                 .limit(5)
                 .populate('registerUser', 'user'),
 
-            Provider.countDocuments()
+            Provider.countDocuments({ "status": true })
         ])
 
         res.json({
@@ -30,7 +30,7 @@ const getProviders = async (req, res) => {
 }
 const getProvidersAll = async (req, res) => {
     try {
-        const providers = await Provider.find()
+        const providers = await Provider.find({ "status": true })
         res.json({
             status: 200,
             ok: true,
@@ -63,21 +63,24 @@ const getProvider = async (req, res) => {
 //<-------------POST  create new user with password encryption ---------------->
 const createProvider = async (req, res) => {
     const _id = req._id;
+    const regex = /^[0-9]*$/;
     const newProvider = new Provider({
         registerUser: _id,
         ...req.body
     });
     const name = newProvider.name;
+    const phone=newProvider.phone;
     try {
 
         // Validation of user with username
-        const validationProvider = await Provider.findOne({ name });
+        const validationProvider = await Provider.findOne({ name , "status": true });
         if (validationProvider) {
             return res.status(400).json({
                 ok: false,
                 msg: `El provedor: ${name} ya esta registrado`
             });
         }
+       
         await newProvider.save();
         res.status(200).json({
             ok: true,
@@ -118,7 +121,7 @@ const editProvider = async (req, res) => {
         console.log("respuesta de form " + name)
         if (findProviderDB.name !== name) {
 
-            const validationProvider = await Provider.findOne({ name });
+            const validationProvider = await Provider.findOne({ name, "status": true });
             if (validationProvider) {
                 return res.status(400).json({
                     ok: false,
@@ -160,9 +163,16 @@ const deleteProvider = async (req, res) => {
             });
         }
         //Delete user by id in db
-        await Provider.findByIdAndDelete(_id);
-
-        res.json({
+        // await Provider.findByIdAndDelete(_id);
+        await Provider.findByIdAndUpdate(_id, { status: false}, { new: true }, (err, userBD) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+        });
+        res.status(200).json({
             ok: true,
             msg: "Provedor eliminado con exito"
         })
@@ -171,7 +181,7 @@ const deleteProvider = async (req, res) => {
         console.log(error);
         res.status(500).json({
             ok: false,
-            msg: 'No se ha podido eliminar al usuario'
+            msg: 'No se ha podido eliminar el provedor'
         })
     }
 }

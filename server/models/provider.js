@@ -24,7 +24,6 @@ const ProviderSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'El telefono de provedor es requerido'],
         trim: true,
-        min: [10, "El telefono solo puede tener 10 digitos"]
 
     },
 

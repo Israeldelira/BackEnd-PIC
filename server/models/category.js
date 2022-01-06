@@ -22,8 +22,16 @@ const CategorySchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }
+},
+    {
+        collection: "Category",
+        timestamps: {
+            createdAt: "created_at",
+            updatedAt: "updated_at",
+        },
+    }
 
-});
+);
 CategorySchema.plugin(uniquevalidator, {
     message: '{PATH} Debe ser unico y diferente'
 });

@@ -11,32 +11,64 @@ const getAll = async (req, res) => {
     const data = req.params.searchData;
     const regex = new RegExp(data, 'i');
     const [searchUser, searchArticle, searchProvider, searchCategory, searchProject] = await Promise.all([
+
         User.find({
-            $or: [
-                { nombre: regex },
-                { user: regex }
-            ]},'img nombre user role status'),
+            $and: [
+                { $or: [
+                    { nombre: regex },
+                    { user: regex }] },
+                { $or: [{status:true}] }
+            ]
+            },'img nombre user role status'),
+
+        
+        // User.find({
+            
+        //     $or: [
+        //         { nombre: regex },
+        //         { user: regex }
+        //     ]},'img nombre user role status'),
 
         Article.find({
-            $or: [
-                { name: regex },
+            $and: [
+                { $or: [
+                    { name: regex },
                 { model: regex },
-                { trademark: regex },
+                { trademark: regex }] },
+                { $or: [{status:true}] }
             ]
+            // $or: [
+            //     { name: regex },
+            //     { model: regex },
+            //     { trademark: regex },
+            // ]
         }).populate('registerUser', 'nombre user')
         .populate('category', 'name')
         .populate('providerId', 'name'),
        
-        Provider.find({ name: regex })
+        Provider.find({
+             $and: [
+            { $or: [
+                { name: regex },] },
+            { $or: [{status:true}] }
+        ] })
         .populate('registerUser', 'nombre'),
 
-        Category.find({ name: regex })
+        Category.find({
+            $and: [
+           { $or: [
+               { name: regex },] },
+           { $or: [{status:true}] }
+       ] })
         .populate('registerUser','user'),
 
-        Project.find({  $or: [
-            { name: regex },
-            { client: regex },
-        ]})
+        Project.find({
+            $and: [
+           { $or: [
+               { name: regex },
+               { client: regex },] },
+           { $or: [{status:true}] }
+       ] })
         .populate('registerUser','user')
         .populate('article','name')
     ]);
@@ -62,47 +94,70 @@ const getCollectionAll = async (req, res = response) => {
     switch (table) {
         case 'users':
 
-            result = await User.find({
-                $or: [
-                    { nombre: regex },
-                    { user: regex }
+            result = await  User.find({
+                $and: [
+                    { $or: [
+                        { nombre: regex },
+                        { user: regex }] },
+                    { $or: [{status:true}] }
                 ]
-            },'img nombre user role status');
+                },'img nombre user role status')
+    
             
             break;
         case 'articles':
-            result = await Article.find({
-                $or: [
-                    { name: regex },
+            result = await         Article.find({
+                $and: [
+                    { $or: [
+                        { name: regex },
                     { model: regex },
-                    { trademark: regex },
+                    { trademark: regex }] },
+                    { $or: [{status:true}] }
                 ]
+                // $or: [
+                //     { name: regex },
+                //     { model: regex },
+                //     { trademark: regex },
+                // ]
             }).populate('registerUser', 'nombre user')
-                .populate('category', 'name')
-                .populate('providerId', 'name');
+            .populate('category', 'name')
+            .populate('providerId', 'name');
 
             break;
 
         case 'providers':
 
-            result = await Provider.find({ name: regex })
-                .populate('registerUser', 'nombre');
+            result = await Provider.find({
+                $and: [
+               { $or: [
+                   { name: regex },] },
+               { $or: [{status:true}] }
+           ] })
+           .populate('registerUser', 'nombre')
             break;
 
         case 'categorys':
 
-            result = await Category.find({ name: regex })
-            .populate('registerUser','user');
+            result = await  Category.find({
+                $and: [
+               { $or: [
+                   { name: regex },] },
+               { $or: [{status:true}] }
+           ] })
+            .populate('registerUser','user')
             break;
 
         case 'projects':
 
-                result = await Project.find({  $or: [
-                    { name: regex },
-                    { client: regex },
-                ] })
-                .populate('registerUser','user')
-                .populate('article','name')
+            Project.find({
+                $and: [
+               { $or: [
+                   { name: regex },
+                   { client: regex },] },
+               { $or: [{status:true}] }
+           ] })
+            .populate('registerUser','user')
+            .populate('article','name')
                 break;
 
         case 'bajas':
@@ -121,6 +176,7 @@ const getCollectionAll = async (req, res = response) => {
                 {
                   $match: {
                     "article.name": { $regex: regex }
+
                   }
                 },
                 {

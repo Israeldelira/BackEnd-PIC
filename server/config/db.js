@@ -21,8 +21,7 @@ const conenctToLocalDB = async () => {
     try {
         await mongoose.connect(MONGO_LOCAL, connectionParams)
         console.log('Conexion Local Exitosa MONGO')
-    } catch {
-        (error)
+    } catch(error) {
         console.log(error)
         throw new Error('Error al iniciar DB, Visualizar logs')
 

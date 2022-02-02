@@ -38,8 +38,7 @@ if (process.env.DEVELOPMENT) {
     key: fs.readFileSync('./server/ssl/key.pem'),
     cert: fs.readFileSync('./server/ssl/cert.pem')
    }
-
-//Server
+//Server con https
 //    const serverStart = async () => {
 //     try {
 //         // start the server

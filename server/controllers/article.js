@@ -1,15 +1,17 @@
 //Modules and files
+const QRCode = require('qrcode')
+const path = require('path');
+const fs = require('fs');
 const Article = require('../models/article');
 const Input = require('../models/input');
 const Output = require('../models/output');
 const Project = require('../models/project');
-const QRCode = require('qrcode')
-const path = require('path');
-const fs = require('fs');
-const fileUp = require('express-fileupload');
 const { uploadIMG } = require('../controllers/upload')
-//<-------------GET all articles  ---------------->
 
+/*
+GET  PROMESA para obtener articulos con paginacion
+y el total de articulos
+*/
 const getArticles = async (req, res) => {
     try {
         const pagination = Number(req.query.pagination) || 0;
@@ -22,7 +24,7 @@ const getArticles = async (req, res) => {
                 .populate('providerId', 'name'),
             Article.countDocuments()
         ])
-
+//Mandamos la respuesta en json con el resultado de la promesa
         res.json({
             status: 200,
             ok: true,
@@ -34,6 +36,17 @@ const getArticles = async (req, res) => {
         console.log(err);
     }
 }
+
+/* 
+Promesa que nos devuelve 4 parametros que son 
+-total de stock bajo
+-total de stock alto
+-Articulos con stock bajo
+-Articulos con stock alto
+
+Obtenemos las alertas que manda el dashboard filtrando mediante el nivel de stock
+y con la cantidad 2 o 10 dependiendo del nivel
+ */
 const dashboardStock = async (req, res) => {
     try {
 
@@ -68,6 +81,7 @@ const dashboardStock = async (req, res) => {
         console.log(err);
     }
 }
+//Obtenemos todos los articulos
 const getArticlesAll = async (req, res) => {
     try {
         const articles = await Article.find()
@@ -83,9 +97,12 @@ const getArticlesAll = async (req, res) => {
     }
 }
 
+//Obtenemos el articulo por id mandado por los params 
+
 const getArticle = async (req, res) => {
     const _id = req.params.id;
     try {
+        //Buscamos por id
         if (_id.match(/^[0-9a-fA-F]{24}$/)) {
             const article = await Article.findById(_id)
                 .populate('registerUser', 'user')
@@ -98,6 +115,7 @@ const getArticle = async (req, res) => {
                 article: article,
             })
         } else {
+            //Buscamos por modelo
             const articleModel = await Article.findOne({ model: _id })
                 .populate('registerUser', 'user')
                 .populate('category', 'name')
@@ -117,7 +135,6 @@ const getArticle = async (req, res) => {
     }
 }
 
-//<-------------POST  create new user with password encryption ---------------->
 const createArticle = async (req, res) => {
 
     const { codeQR, registerUser, ...body } = req.body;
@@ -151,13 +168,6 @@ const createArticle = async (req, res) => {
         // }
         console.log("si manda el modelo" + body.model)
         const urlArticulo = `http://192.168.3.22:4200/dashboard/salidas/${body.model}`
-
-
-        // const dataNotQR = {
-        //     urlArticulo
-        // //   model:body.model
-        // }
-
 
         console.log("este es el id  " + req._id)
         // let strQR = JSON.stringify(dataNotQR)
